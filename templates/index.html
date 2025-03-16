@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Análisis de imágenes médicas</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+  <header>
+    <h1>Clasificación Asistida de Anomalías Mamográficas</h1>
+  </header>
+
+  <main class="container">
+    <!-- Sección de carga de archivo .dcm -->
+    <section class="upload-section">
+      <h2>Subir imagen DICOM</h2>
+
+      <form class="upload-form" action="/" method="POST" enctype="multipart/form-data" onsubmit="showLoadingMessage()">
+
+        <!-- Contenedor de la parte donde se elige el archivo -->
+        <div class="file-upload-container">
+          <label for="dicomFile" class="custom-file-label">
+            <span id="file-label-text">Seleccionar archivo .dcm</span>
+            <input
+              type="file"
+              id="dicomFile"
+              name="dicom_file"
+              accept=".dcm"
+              required
+              class="hidden-file-input"
+            />
+          </label>
+        </div>
+
+        <button type="submit">Analizar</button>
+      </form>
+
+      <div id="loading-message">
+        <p>Procesando la imagen. Por favor, espere...</p>
+        <div class="loader"></div>
+      </div>
+    </section>
+
+    <!-- Sección de resultados -->
+    {% if original_b64 %}
+    <section class="results-section">
+      <h2>Resultados</h2>
+      <p><strong>Tipo de anormalidad:</strong> {{ pred_label_text }}</p>
+      <p><strong>Confianza:</strong> {{ confidence }}%</p>
+
+      <div class="images-container">
+        <div class="image-box">
+          <img src="data:image/png;base64,{{ original_b64 }}" alt="Imagen Original">
+          <p>Imagen Original</p>
+        </div>
+        <div class="image-box">
+          <img src="data:image/png;base64,{{ heatmap_b64 }}" alt="Heatmap Crudo">
+          <p>Heatmap</p>
+        </div>
+        <div class="image-box">
+          <img src="data:image/png;base64,{{ superimposed_b64 }}" alt="Superposición">
+          <p>Superposición</p>
+        </div>
+      </div>
+    </section>
+    {% endif %}
+  </main>
+
+  <footer>
+    © 2025 Hangaroa. Todos los derechos reservados.
+  </footer>
+
+  <script>
+
+    function showLoadingMessage() {
+      document.getElementById("loading-message").style.display = "block";
+    }
+
+    const fileInput = document.getElementById("dicomFile");
+    fileInput.addEventListener("change", function(event) {
+      const fileLabel = document.getElementById("file-label-text");
+      if (fileInput.files && fileInput.files.length > 0) {
+        fileLabel.textContent = fileInput.files[0].name;
+      } else {
+        fileLabel.textContent = "Seleccionar archivo .dcm";
+      }
+    });
+  </script>
+</body>
+</html>
