@@ -9,9 +9,8 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from tensorflow.keras.models import load_model
-import os
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1" 
+
 
 # Crear instancia de FastAPI
 app = FastAPI()
