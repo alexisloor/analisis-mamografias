@@ -11,7 +11,6 @@ from fastapi.staticfiles import StaticFiles
 from tensorflow.keras.models import load_model
 
 
-
 # Crear instancia de FastAPI
 app = FastAPI()
 
