@@ -21,7 +21,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 # Cargar del modelo preentrenado (archivo.h5)
-model = load_model("model/breast_analysis.h5")
+model = load_model("model/eficcientnetB6.h5")
 
 # Función para cargar y preprocesar la imagen DICOM
 def load_dicom_image_from_bytes(file_bytes):
@@ -122,6 +122,23 @@ async def analyze(request: Request, dicom_file: UploadFile = File(...)):
     label_dict = {0: "Maligno", 1: "Benigno"}
     pred_label_text = label_dict.get(pred_class, "Desconocido")
 
+    # Convertir la predicción a texto y analizar la confianza
+    label_dict = {0: "Maligno", 1: "Benigno"}
+    pred_label_text = label_dict.get(pred_class, "Desconocido")
+
+    # Evaluar el nivel de confianza para Benigno
+    confidence_msg = ""
+    if pred_class == 1:
+        if confidence >= 85:
+            confidence_msg = "Clasificación Benigna con alta confianza."
+        elif 65 <= confidence < 85:
+            confidence_msg = "⚠️ Clasificación Benigna con baja confianza. Se recomienda análisis adicional para confirmación."
+        else:
+            confidence_msg = "🚨 Clasificación Benigna con muy baja confianza. Se recomienda evaluación médica inmediata para confirmación."
+    elif pred_class == 0:
+        confidence_msg = "Clasificación Maligna. Evaluación clínica prioritaria sugerida."
+
+
     # Convertir las imágenes a Base64 para integrarlas en el HTML
     original_b64 = array_to_base64(np.uint8(image * 255))
     heatmap_b64 = array_to_base64(heatmap)
@@ -134,5 +151,6 @@ async def analyze(request: Request, dicom_file: UploadFile = File(...)):
         "heatmap_b64": heatmap_b64,
         "superimposed_b64": superimposed_b64,
         "pred_label_text": pred_label_text,
-        "confidence": f"{confidence:.2f}"
+        "confidence": f"{confidence:.2f}",
+        "confidence_msg": confidence_msg
     })
